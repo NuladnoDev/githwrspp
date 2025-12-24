@@ -40,6 +40,9 @@ from text_config import (
     format_room,
     format_subject,
     format_teacher,
+    format_exam_line,
+    format_practice_line,
+    NO_LESSON_SUBJECT,
     PIN_BUTTON_TEXT,
 )
 
@@ -128,6 +131,44 @@ def format_schedule_text(group: str, payload: dict) -> str:
     if not schedule:
         return f"Для группы {group} ничего не найдено в последнем расписании."
 
+    def parse_pair_index_for_render(value: str) -> int | None:
+        match = re.match(r"^(\d+)(?:[.,]0+)?$", value)
+        if not match:
+            return None
+        return int(match.group(1))
+
+    by_index: dict[int, dict] = {}
+    other_items: list[dict] = []
+    for item in schedule:
+        pair_str = str(item.get("pair", "")).strip()
+        idx = parse_pair_index_for_render(pair_str)
+        if idx is None:
+            other_items.append(item)
+        else:
+            by_index[idx] = item
+
+    if by_index:
+        max_index = max(by_index.keys())
+        normalized: list[dict] = []
+        for i in range(1, max_index + 1):
+            existing = by_index.get(i)
+            if existing is not None:
+                normalized.append(existing)
+            else:
+                normalized.append(
+                    {
+                        "pair": f"{i}.0",
+                        "time": "",
+                        "subject": NO_LESSON_SUBJECT,
+                        "teacher": "",
+                        "room": "",
+                    }
+                )
+        normalized.extend(other_items)
+        schedule_for_render = normalized
+    else:
+        schedule_for_render = schedule
+
     previous_by_pair = {
         str(item.get("pair", "")).strip(): item for item in previous
     }
@@ -136,7 +177,7 @@ def format_schedule_text(group: str, payload: dict) -> str:
     lines.append(format_header(group))
     lines.append("")
 
-    for item in schedule:
+    for item in schedule_for_render:
         pair = str(item.get("pair", "")).strip()
         time = str(item.get("time", "")).strip()
         subject = str(item.get("subject", "")).strip()
@@ -144,6 +185,25 @@ def format_schedule_text(group: str, payload: dict) -> str:
         room = str(item.get("room", "")).strip()
 
         if not subject and not teacher:
+            continue
+
+        subj_lower = subject.lower()
+        is_exam = (
+            "экзамен" in subj_lower
+            or "сдача задолженностей" in subj_lower
+            or "зачет" in subj_lower
+            or "зачёт" in subj_lower
+        )
+        is_practice = "практика" in subj_lower
+
+        if is_exam:
+            lines.append(format_exam_line(subject))
+            lines.append("")
+            continue
+
+        if is_practice:
+            lines.append(format_practice_line(subject))
+            lines.append("")
             continue
 
         old = previous_by_pair.get(pair)

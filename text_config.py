@@ -37,6 +37,10 @@ PAIR_NUMBERS = {
     "6.0": "Шестая",
 }
 
+NO_LESSON_SUBJECT = "Пары нет/отменена"
+EXAM_LINE_TEMPLATE = "📝 {text}"
+PRACTICE_LINE_TEMPLATE = "🛠 {text}"
+
 
 def format_header(group: str) -> str:
     return HEADER_TEMPLATE.format(group=escape(group))
@@ -102,3 +106,11 @@ def format_group_add_welcome() -> str:
     line1 = escape(GROUP_ADD_WELCOME_LINE1)
     line2 = escape(GROUP_ADD_WELCOME_LINE2)
     return f"{line1}\n\n<i>{line2}</i>"
+
+
+def format_exam_line(raw: str) -> str:
+    return EXAM_LINE_TEMPLATE.format(text=escape(raw))
+
+
+def format_practice_line(raw: str) -> str:
+    return PRACTICE_LINE_TEMPLATE.format(text=escape(raw))
