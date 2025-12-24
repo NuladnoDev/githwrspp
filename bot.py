@@ -89,15 +89,17 @@ def get_chat_group(chat_id: int) -> str | None:
     return group
 
 
-def unsubscribe_chat(chat_id: int) -> bool:
+def toggle_chat_notifications(chat_id: int) -> tuple[bool, bool]:
     state = load_state()
     chats = state.setdefault("chats", {})
     cfg = chats.get(str(chat_id))
     if not cfg:
-        return False
-    cfg["notifications"] = False
+        return False, False
+    current = cfg.get("notifications", True)
+    new_value = not current
+    cfg["notifications"] = new_value
     save_state(state)
-    return True
+    return True, new_value
 
 
 def build_pin_keyboard() -> types.InlineKeyboardMarkup:
@@ -216,15 +218,21 @@ async def handle_group_command(message: types.Message) -> None:
 
 @router.message(Command("unsubscribe"))
 async def handle_unsubscribe_command(message: types.Message) -> None:
-    disabled = unsubscribe_chat(message.chat.id)
-    if disabled:
+    exists, enabled = toggle_chat_notifications(message.chat.id)
+    if not exists:
         await message.answer(
-            "Рассылка о новых расписаниях для этого чата отключена.",
+            "Для этого чата ещё не привязана группа.",
+            parse_mode="HTML",
+        )
+        return
+    if enabled:
+        await message.answer(
+            "Уведомления о новых расписаниях для этого чата включены.",
             parse_mode="HTML",
         )
     else:
         await message.answer(
-            "Для этого чата ещё не привязана группа.",
+            "Рассылка о новых расписаниях для этого чата отключена.",
             parse_mode="HTML",
         )
 
