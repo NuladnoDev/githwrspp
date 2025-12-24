@@ -296,6 +296,11 @@ def main() -> None:
 
 if __name__ == "__main__":
     import os
+    import asyncio
 
     if os.environ.get("RUN_SCHEDULE_CLI") == "1":
         main()
+    else:
+        from bot import main as bot_main
+
+        asyncio.run(bot_main())
