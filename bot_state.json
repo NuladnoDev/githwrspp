@@ -1,0 +1,21 @@
+{
+  "chats": {
+    "-5033709819": {
+      "group": "158",
+      "notifications": true
+    }
+  },
+  "last_schedule_file": "Raspisanie_na_25_dekabrya_2025_2026_uch_god.xls",
+  "last_schedule_hash": "7f96c776bd94a330c35edf72e99286787afc20b332f843ba6a8a63af07388e3b",
+  "last_schedules_by_group": {
+    "158": [
+      {
+        "pair": "1.0",
+        "time": "8.30-9.15",
+        "subject": "ЭКЗАМЕН                    МАТЕМАТИКА                    17 каб. Преподаватель Веркина Г.А.",
+        "teacher": "",
+        "room": ""
+      }
+    ]
+  }
+}

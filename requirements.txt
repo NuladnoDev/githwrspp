@@ -1,0 +1,8 @@
+requests
+beautifulsoup4
+openpyxl
+xlrd
+fastapi
+uvicorn
+aiogram
+python-dotenv
