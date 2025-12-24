@@ -295,4 +295,7 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import os
+
+    if os.environ.get("RUN_SCHEDULE_CLI") == "1":
+        main()
