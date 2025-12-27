@@ -364,11 +364,6 @@ async def handle_plain_group(message: types.Message) -> None:
         await send_schedule_for_group(message, group)
         return
 
-    group = extract_group(text)
-    if not group:
-        return
-    await send_schedule_for_group(message, group)
-
 
 @router.message(F.new_chat_members)
 async def handle_bot_added_to_group(message: types.Message, bot: Bot) -> None:
@@ -474,21 +469,25 @@ async def send_schedule_for_group(message: types.Message, group: str) -> None:
         await loading.edit_text(DAY_QUESTION_TEXT, reply_markup=keyboard, parse_mode="HTML")
         return
 
-    try:
-        if 0 in days:
+    if 0 in days:
+        try:
             payload = fetch_group_schedule_for_offset(group, 0)
-        else:
-            payload = fetch_group_schedule(group)
-    except Exception:
-        await loading.edit_text(
-            "Не удалось получить расписание:( Свяжитесь с администратором",
-            parse_mode="HTML",
-        )
+        except Exception:
+            await loading.edit_text(
+                "Не удалось получить расписание:( Свяжитесь с администратором",
+                parse_mode="HTML",
+            )
+            return
+
+        text = format_schedule_text(group, payload)
+        keyboard = build_pin_keyboard()
+        await loading.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
         return
 
-    text = format_schedule_text(group, payload)
-    keyboard = build_pin_keyboard()
-    await loading.edit_text(text, reply_markup=keyboard, parse_mode="HTML")
+    await loading.edit_text(
+        "Для ближайших дней расписание на сайте ещё не опубликовано.",
+        parse_mode="HTML",
+    )
 
 
 async def schedule_watcher(bot: Bot) -> None:

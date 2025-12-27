@@ -173,3 +173,11 @@ def fetch_group_schedule_for_offset(group: str, offset: int) -> dict:
 @app.get("/api/schedule")
 def get_schedule(group: str = Query(..., min_length=1)):
     return fetch_group_schedule(group)
+
+
+@app.get("/api/schedule/by-offset")
+def get_schedule_by_offset(
+    group: str = Query(..., min_length=1),
+    offset: int = Query(...),
+):
+    return fetch_group_schedule_for_offset(group, offset)
